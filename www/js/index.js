@@ -4,19 +4,33 @@ let ultimoTimestamp = Date.now();
 
 function onDeviceReady() {
     console.log('Cordova está pronto');
-    setInterval(verificarAtualizacoes, 10000); // Verifica a cada 10 segundos
+
+    // ✅ Solicita permissão (Android 13+)
+    if (cordova.plugins.notification) {
+        cordova.plugins.notification.local.requestPermission(function (granted) {
+            console.log('Permissão de notificação: ', granted);
+        });
+    }
+
+    setInterval(verificarAtualizacoes, 10000);
 }
 
-// ✅ Notificação na barra
+// ✅ Envia notificação com ID único
 function enviarNotificacao(mensagem) {
     if (cordova && cordova.plugins && cordova.plugins.notification) {
+        const id = Date.now(); // 🔥 ID único garantido
+
         cordova.plugins.notification.local.schedule({
+            id: id,
             title: 'Atualização',
             text: mensagem,
-            foreground: true, // Mostra notificação mesmo com o app aberto
+            foreground: true,
         });
+
+        console.log('Notificação enviada:', mensagem, 'ID:', id);
+
     } else {
-        alert(mensagem); // Fallback caso o plugin não esteja disponível
+        alert(mensagem); // Fallback para navegador
     }
 }
 
@@ -37,7 +51,7 @@ function dispararAtualizacao() {
 // 🔍 Verifica atualizações no backend
 function verificarAtualizacoes() {
     const url = `https://api-cordova.vercel.app/updates?since=${ultimoTimestamp}`;
-    
+
     fetch(url)
         .then(response => response.json())
         .then(data => {
