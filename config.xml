@@ -1,11 +1,48 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="br.com.davidsousadev" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="br.com.davidsousadev" version="1.0.0"
+    xmlns="http://www.w3.org/ns/widgets"
+    xmlns:cdv="http://cordova.apache.org/ns/1.0">
+
     <name>Primeiro App</name>
     <description>Sample Apache Cordova App</description>
     <author email="dev@cordova.apache.org" href="https://cordova.apache.org">
         Apache Cordova Team
     </author>
+
     <content src="index.html" />
-    <allow-intent href="http://*/*" />
-    <allow-intent href="https://*/*" />
+    <access origin="*" />
+    <allow-intent href="http://*/*"/>
+    <allow-intent href="https://*/*"/>
+    <allow-intent href="tel:*"/>
+    <allow-intent href="sms:*"/>
+    <allow-intent href="mailto:*"/>
+    <allow-intent href="geo:*"/>
+
+    <!-- Preferências -->
+    <preference name="Fullscreen" value="false"/>
+    <preference name="AndroidLaunchMode" value="singleTop"/>
+    <preference name="Orientation" value="portrait"/>
+    <preference name="SplashScreenDelay" value="2000"/>
+    <preference name="FadeSplashScreenDuration" value="500"/>
+    <preference name="AutoHideSplashScreen" value="true"/>
+
+    <!-- Splash moderno -->
+    <preference name="AndroidWindowSplashScreenAnimatedIcon" value="resources/android/splash.png"/>
+    <preference name="AndroidWindowSplashScreenBackgroundColor" value="#FFFFFF"/>
+    <preference name="AndroidWindowSplashScreenDuration" value="3000"/>
+    <preference name="AndroidWindowSplashScreenFadeOutDuration" value="500"/>
+
+    <!-- Ícone -->
+    <icon src="resources/android/icon.png"/>
+
+    <!-- Plugins -->
+    <plugin name="cordova-plugin-android-permissions" spec="1.1.5"/>
+    <plugin name="cordova-plugin-device" spec="3.0.0"/>
+    <plugin name="cordova-plugin-local-notification" spec="1.1.9-dev"/>
+
+    <hook src="hooks/copy-resources.js" type="after_prepare"/>
+    <hook src="hooks/copy-resources.js" type="after_build"/>
+    <hook src="hooks/copy-resources.js" type="after_platform_add"/>
+
+
 </widget>

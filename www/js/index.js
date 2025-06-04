@@ -64,10 +64,10 @@ function enviarNotificacao(mensagem, linkInterno) {
             title: 'Atualização',
             text: mensagem,
             foreground: true,
-            data: {
-                link: linkInterno // Guarda a URL interna para redirecionar no click
-            }
-        });
+            smallIcon: 'res://ic_stat_notification',
+            sound: 'res://notification',    // sem extensão
+            data: { link: linkInterno }
+        });        
 
         console.log('Notificação enviada:', mensagem, 'ID:', id, 'Link:', linkInterno);
     } else {
