@@ -14,8 +14,8 @@
   "license": "Apache-2.0",
   "cordova": {
     "platforms": [
-      "browser",
-      "android"
+      "android",
+      "browser"
     ],
     "plugins": {
       "cordova-plugin-local-notification": {
@@ -26,7 +26,7 @@
     }
   },
   "devDependencies": {
-    "cordova-android": "^14.0.1",
+    "cordova-android": "^13.0.0",
     "cordova-browser": "^7.0.0",
     "cordova-plugin-android-permissions": "github:NeoLSN/cordova-plugin-android-permissions",
     "cordova-plugin-device": "^3.0.0",
