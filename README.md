@@ -7,6 +7,10 @@
     cordova plugin add https://github.com/katzer/cordova-plugin-local-notifications.git
     cordova plugin add cordova-plugin-device
     cordova plugin add https://github.com/NeoLSN/cordova-plugin-android-permissions.git
+    cordova plugin add cordova-plugin-background-mode
+
+    cordova plugin add cordova-plugin-background-mode
+    cordova plugin add cordova-plugin-dialogs
 
     cordova prepare
     cordova build android

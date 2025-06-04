@@ -1,40 +1,40 @@
-<!-- www/pagina.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Página Interna</title>
-    <script>
-        // Função para ler parâmetros da URL
-        function getQueryParams() {
-            const params = {};
-            const queryString = window.location.search.substring(1);
-            const pares = queryString.split('&');
-            for (let i = 0; i < pares.length; i++) {
-                const [chave, valor] = pares[i].split('=');
-                params[decodeURIComponent(chave)] = decodeURIComponent(valor || '');
-            }
-            return params;
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const params = getQueryParams();
-            const container = document.getElementById('info');
-
-            if (params.msg) {
-                container.innerText = 'Você veio da notificação: ' + params.msg;
-            } else if (params.idEvento) {
-                container.innerText = 'Página do evento ID: ' + params.idEvento;
-                // Aqui você poderia, por exemplo, fazer um fetch('/api/eventos/param.idEvento')…
-            } else {
-                container.innerText = 'Nenhum parâmetro recebido.';
-            }
-        });
-    </script>
-</head>
-<body>
-    <h1>Detalhes da Notificação</h1>
-    <div id="info">Carregando informações…</div>
-    <button onclick="window.location = 'index.html'">Voltar ao início</button>
-</body>
+<!-- www/pagina.html -->  
+<!DOCTYPE html>  
+<html>  
+<head>  
+    <meta charset="UTF-8">  
+    <title>Página Interna</title>  
+    <script>  
+        // Função para ler parâmetros da URL  
+        function getQueryParams() {  
+            const params = {};  
+            const queryString = window.location.search.substring(1);  
+            const pares = queryString.split('&');  
+            for (let i = 0; i < pares.length; i++) {  
+                const [chave, valor] = pares[i].split('=');  
+                params[decodeURIComponent(chave)] = decodeURIComponent(valor || '');  
+            }  
+            return params;  
+        }  
+  
+        document.addEventListener('DOMContentLoaded', function () {  
+            const params = getQueryParams();  
+            const container = document.getElementById('info');  
+  
+            if (params.msg) {  
+                container.innerText = 'Você veio da notificação: ' + params.msg;  
+            } else if (params.idEvento) {  
+                container.innerText = 'Página do evento ID: ' + params.idEvento;  
+                // Aqui você poderia, por exemplo, fazer um fetch('/api/eventos/param.idEvento')…  
+            } else {  
+                container.innerText = 'Nenhum parâmetro recebido.';  
+            }  
+        });  
+    </script>  
+</head>  
+<body>  
+    <h1>Detalhes da Notificação</h1>  
+    <div id="info">Carregando informações…</div>  
+    <button onclick="window.location = 'index.html'">Voltar ao início</button>  
+</body>  
 </html>

@@ -39,7 +39,8 @@
     <plugin name="cordova-plugin-android-permissions" spec="1.1.5"/>
     <plugin name="cordova-plugin-device" spec="3.0.0"/>
     <plugin name="cordova-plugin-local-notification" spec="1.1.9-dev"/>
-
+    <plugin name="cordova-plugin-background-mode" spec="^0.7.4"/>
+    
     <hook src="hooks/copy-resources.js" type="after_prepare"/>
     <hook src="hooks/copy-resources.js" type="after_build"/>
     <hook src="hooks/copy-resources.js" type="after_platform_add"/>
