@@ -3,13 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>Notificador Cordova</title>
+    <!-- cordova.js é injetado pelo Cordova no build final -->
     <script src="cordova.js"></script>
     <script src="js/index.js"></script>
 </head>
 <body>
     <h1>Notificador Cordova</h1>
-    <button onclick="enviarNotificacao('Notificação manual')">Enviar Notificação</button>
+
+    <!-- Botão que manda notificação manual apenas com texto e um link genérico -->
+    <button onclick="enviarNotificacao('Notificação manual enviada!', 'pagina.html?msg=manual')">
+        Enviar Notificação
+    </button>
+
+    <!-- Botão para disparar atualização por API -->
     <button onclick="dispararAtualizacao()">Disparar Atualização</button>
+
     <p id="status">Aguardando atualizações...</p>
 </body>
 </html>
