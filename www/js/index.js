@@ -1,7 +1,7 @@
-// www/js/index.js
-
 document.addEventListener('deviceready', onDeviceReady, false);
 
+let ws;                       // variável para armazenar o WebSocket
+const WS_URL = 'wss://api-cordova.vercel.app/socket'; 
 let ultimoTimestamp = Date.now();
 
 function onDeviceReady() {
@@ -19,28 +19,24 @@ function onDeviceReady() {
         }
     });
 
-    // 3) Iniciar o polling para buscar atualizações a cada 10 segundos
-    setInterval(verificarAtualizacoes, 10000);
+    // 3) Abrir conexão WebSocket para receber atualizações em tempo real
+    iniciarWebSocket();
 }
 
 // ===== Função que força a solicitação de permissão =====
 function solicitarPermissaoNotificacao() {
-    // 1) Primeiro, checa se o plugin está disponível
     if (
         cordova &&
         cordova.plugins &&
         cordova.plugins.notification &&
         cordova.plugins.notification.local
     ) {
-        // 2) Verifica se já existe permissão
         cordova.plugins.notification.local.hasPermission(function (granted) {
             console.log('Permissão existente (local):', granted);
-            // Se não existe permissão, pede ao sistema
             if (!granted) {
                 cordova.plugins.notification.local.requestPermission(function (grantedRequest) {
                     console.log('Permissão solicitada (local):', grantedRequest);
                     if (!grantedRequest) {
-                        // Caso o usuário negue, mostramos um aviso simples.
                         alert('É necessário permitir notificações para receber atualizações.');
                     }
                 });
@@ -82,7 +78,6 @@ function dispararAtualizacao() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Exemplo de notificação manual: redireciona para pagina.html?msg=manual
                 enviarNotificacao('Atualização manual disparada!', 'pagina.html?msg=manual');
             }
         })
@@ -91,32 +86,60 @@ function dispararAtualizacao() {
         });
 }
 
-// ===== Verifica atualizações no backend =====
-function verificarAtualizacoes() {
-    const url = `https://api-cordova.vercel.app/updates?since=${ultimoTimestamp}`;
+// ===== Abre conexão WebSocket =====
+function iniciarWebSocket() {
+    // Se já existir uma conexão aberta, fechamos antes
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.close();
+    }
 
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            if (data.nova) {
-                data.atualizacoes.forEach(item => {
-                    // Aqui, como o backend (mysql/postgres/etc) retornou só { id, mensagem, timestamp },
-                    // construímos localmente o link interno com base em item.id:
-                    const linkInterno = `pagina.html?idEvento=${item.id}`;
+    try {
+        ws = new WebSocket(WS_URL);
 
-                    enviarNotificacao(item.mensagem, linkInterno);
+        ws.onopen = function () {
+            console.log('WebSocket aberto em:', WS_URL);
+            // Opcional: caso queira enviar algo ao servidor no momento de abertura, descomente abaixo.
+            // Mas o nosso socket.js no back-end já faz broadcast sempre que "NOTIFY" é recebido.
+            // const payload = JSON.stringify({ type: 'sync', since: ultimoTimestamp });
+            // ws.send(payload);
+        };
 
-                    if (item.timestamp > ultimoTimestamp) {
-                        ultimoTimestamp = item.timestamp;
-                    }
-                });
-                document.getElementById('status').innerText = 'Nova atualização recebida!';
-            } else {
-                document.getElementById('status').innerText = 'Sem novas atualizações.';
+        ws.onmessage = function (event) {
+            console.log('Mensagem recebida via WebSocket:', event.data);
+            try {
+                const data = JSON.parse(event.data);
+                // Espera-se formato: { nova: boolean, atualizacoes: [ { id, mensagem, timestamp } ] }
+                if (data.nova && Array.isArray(data.atualizacoes)) {
+                    data.atualizacoes.forEach(item => {
+                        const linkInterno = `pagina.html?idEvento=${item.id}`;
+                        enviarNotificacao(item.mensagem, linkInterno);
+
+                        if (item.timestamp > ultimoTimestamp) {
+                            ultimoTimestamp = item.timestamp;
+                        }
+                    });
+                    document.getElementById('status').innerText = 'Nova atualização recebida via WebSocket!';
+                } else {
+                    document.getElementById('status').innerText = 'Sem novas atualizações.';
+                }
+            } catch (e) {
+                console.error('Erro ao parsear mensagem WebSocket:', e);
             }
-        })
-        .catch(err => {
-            console.error('Erro na verificação:', err);
-            document.getElementById('status').innerText = 'Erro na conexão.';
-        });
+        };
+
+        ws.onerror = function (err) {
+            console.error('Erro no WebSocket:', err);
+            document.getElementById('status').innerText = 'Erro na conexão WebSocket.';
+        };
+
+        ws.onclose = function (event) {
+            console.log('WebSocket fechado:', event.code, event.reason);
+            // Opcional: tentar reconectar após alguns segundos
+            setTimeout(iniciarWebSocket, 5000);
+            document.getElementById('status').innerText = 'WebSocket desconectado. Tentando reconectar...';
+        };
+    } catch (ex) {
+        console.error('Falha ao iniciar WebSocket:', ex);
+        document.getElementById('status').innerText = 'Não foi possível iniciar WebSocket.';
+    }
 }
