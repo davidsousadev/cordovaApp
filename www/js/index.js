@@ -1,7 +1,10 @@
 document.addEventListener('deviceready', onDeviceReady, false);
 
-let ws;                       // variável para armazenar o WebSocket
-const WS_URL = 'wss://api-cordova.vercel.app/socket'; 
+let ws;  // variável para armazenar o WebSocket
+const URL_BASE = "api-cordova.onrender.com";
+const HTTP_URL = `https://${URL_BASE}`;
+const WS_URL = `wss://${URL_BASE}/socket`;
+
 let ultimoTimestamp = Date.now();
 
 function onDeviceReady() {
@@ -14,7 +17,6 @@ function onDeviceReady() {
     cordova.plugins.notification.local.on('click', function (notification) {
         console.log('Notificação clicada, abriu link:', notification.data.link);
         if (notification.data && notification.data.link) {
-            // Redirecionar para a página interna (usa query params)
             window.location = notification.data.link;
         }
     });
@@ -53,7 +55,7 @@ function enviarNotificacao(mensagem, linkInterno) {
         cordova.plugins.notification &&
         cordova.plugins.notification.local
     ) {
-        const id = Date.now(); // Garante ID único
+        const id = Date.now();
 
         cordova.plugins.notification.local.schedule({
             id: id,
@@ -61,20 +63,19 @@ function enviarNotificacao(mensagem, linkInterno) {
             text: mensagem,
             foreground: true,
             smallIcon: 'res://ic_stat_notification',
-            sound: 'res://notification',    // sem extensão
+            sound: 'res://notification',
             data: { link: linkInterno }
-        });        
+        });
 
         console.log('Notificação enviada:', mensagem, 'ID:', id, 'Link:', linkInterno);
     } else {
-        // Fallback simples para navegador em desktop
         alert(`(Fallback) ${mensagem}\nAbra: ${linkInterno}`);
     }
 }
 
 // ===== Função manual para disparar atualização =====
 function dispararAtualizacao() {
-    fetch('https://api-cordova.vercel.app/trigger')
+    fetch(`${HTTP_URL}/trigger`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -88,7 +89,6 @@ function dispararAtualizacao() {
 
 // ===== Abre conexão WebSocket =====
 function iniciarWebSocket() {
-    // Se já existir uma conexão aberta, fechamos antes
     if (ws && ws.readyState === WebSocket.OPEN) {
         ws.close();
     }
@@ -98,17 +98,13 @@ function iniciarWebSocket() {
 
         ws.onopen = function () {
             console.log('WebSocket aberto em:', WS_URL);
-            // Opcional: caso queira enviar algo ao servidor no momento de abertura, descomente abaixo.
-            // Mas o nosso socket.js no back-end já faz broadcast sempre que "NOTIFY" é recebido.
-            // const payload = JSON.stringify({ type: 'sync', since: ultimoTimestamp });
-            // ws.send(payload);
         };
 
         ws.onmessage = function (event) {
             console.log('Mensagem recebida via WebSocket:', event.data);
             try {
                 const data = JSON.parse(event.data);
-                // Espera-se formato: { nova: boolean, atualizacoes: [ { id, mensagem, timestamp } ] }
+
                 if (data.nova && Array.isArray(data.atualizacoes)) {
                     data.atualizacoes.forEach(item => {
                         const linkInterno = `pagina.html?idEvento=${item.id}`;
@@ -118,9 +114,9 @@ function iniciarWebSocket() {
                             ultimoTimestamp = item.timestamp;
                         }
                     });
-                    document.getElementById('status').innerText = 'Nova atualização recebida via WebSocket!';
+                    atualizarStatus('Nova atualização recebida via WebSocket!');
                 } else {
-                    document.getElementById('status').innerText = 'Sem novas atualizações.';
+                    atualizarStatus('Sem novas atualizações.');
                 }
             } catch (e) {
                 console.error('Erro ao parsear mensagem WebSocket:', e);
@@ -129,17 +125,24 @@ function iniciarWebSocket() {
 
         ws.onerror = function (err) {
             console.error('Erro no WebSocket:', err);
-            document.getElementById('status').innerText = 'Erro na conexão WebSocket.';
+            atualizarStatus('Erro na conexão WebSocket.');
         };
 
         ws.onclose = function (event) {
             console.log('WebSocket fechado:', event.code, event.reason);
-            // Opcional: tentar reconectar após alguns segundos
+            atualizarStatus('WebSocket desconectado. Tentando reconectar...');
             setTimeout(iniciarWebSocket, 5000);
-            document.getElementById('status').innerText = 'WebSocket desconectado. Tentando reconectar...';
         };
     } catch (ex) {
         console.error('Falha ao iniciar WebSocket:', ex);
-        document.getElementById('status').innerText = 'Não foi possível iniciar WebSocket.';
+        atualizarStatus('Não foi possível iniciar WebSocket.');
+    }
+}
+
+// ===== Atualiza status na interface =====
+function atualizarStatus(texto) {
+    const statusEl = document.getElementById('status');
+    if (statusEl) {
+        statusEl.innerText = texto;
     }
 }
