@@ -26,3 +26,5 @@ node_modules/
 /platforms/
 
 venv
+
+google-services.json
